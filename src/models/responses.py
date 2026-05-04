@@ -17,3 +17,8 @@ class Source(BaseModel):
 class GenerateResponse(BaseModel):
     generated_text: str
     sources: list[Source]
+
+
+class AskResponse(BaseModel):
+    answer: str
+    sources: list[Source]
