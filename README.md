@@ -100,10 +100,33 @@ curl -s -X POST "http://127.0.0.1:8000/generate" \
   }' | jq
 ```
 
+### `POST /ask`
+
+Ask a question and get an LLM-summarized answer based on retrieved materials.
+
+Request fields:
+
+- `query`: required, the question
+- `material_ids`: optional
+- `user_id`: optional
+- `top_k`: default `3`
+
+Example:
+
+```bash
+curl -s -X POST "http://127.0.0.1:8000/ask" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "query": "射击游戏有哪些",
+    "material_ids": ["mat-001"],
+    "top_k": 3
+  }' | jq
+```
+
 ## Test
 
 ```bash
 uv run pytest -q
 ```
 
-Current baseline: `26 passed`.
+Current baseline: `36 passed`.

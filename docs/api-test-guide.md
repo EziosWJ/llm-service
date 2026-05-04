@@ -159,6 +159,55 @@ uv run python test_api.py generate --type title --topic "人工智能发展" --t
 }
 ```
 
+### 6. POST /ask — 知识问答
+
+必填参数：
+
+| 参数 | 说明 |
+|------|------|
+| `--query` | 用户问题 |
+
+可选参数：
+
+| 参数 | 说明 |
+|------|------|
+| `--material-ids` | 材料 ID 列表，逗号分隔 |
+| `--user-id` | 用户 ID（按用户过滤片段） |
+| `--top-k` | 返回片段数量，默认 3 |
+
+示例：
+
+```bash
+# 基本问答
+uv run python test_api.py ask --query "射击游戏有哪些"
+
+# 指定材料范围
+uv run python test_api.py ask --query "帝国时代是什么类型" --material-ids mat_001
+
+# 按用户过滤
+uv run python test_api.py ask --query "有哪些赛车游戏" --user-id user_1
+
+# 调整检索数量
+uv run python test_api.py ask --query "独立游戏有哪些" --top-k 5
+```
+
+预期响应：
+
+```json
+{
+  "answer": "根据材料，射击类游戏共有 4 款，分别是...",
+  "sources": [
+    {
+      "text": "引用的片段内容",
+      "material_id": "mat_001",
+      "score": 0.85
+    }
+  ]
+}
+```
+
+与 `/generate` 的区别：`/ask` 用于简短问答，输入是一个问句，返回简洁回答；`/generate` 用于内容创作，输入是写作主题，返回完整文章。
+
 ## 常见问题
 
 ### Thinking 模式导致超时

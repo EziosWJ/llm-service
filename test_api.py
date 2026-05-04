@@ -2,14 +2,16 @@
 """手动 API 测试脚本。
 
 用法:
-    python test_api.py root
-    python test_api.py health [--deep]
-    python test_api.py process --file <path> --material-id <id> --user-id <id>
-    python test_api.py delete --material-id <id> [--user-id <id>]
-    python test_api.py generate --type <type> --topic <topic> [--content <text>] [--material-ids <id,...>] [--user-id <id>] [--top-k <n>]
+    uv run python test_api.py root
+    uv run python test_api.py health [--deep]
+    uv run python test_api.py process --file <path> --material-id <id> --user-id <id>
+    uv run python test_api.py delete --material-id <id> [--user-id <id>]
+    uv run python test_api.py generate --type <type> --topic <topic> [--content <text>] [--material-ids <id,...>] [--user-id <id>] [--top-k <n>]
+    uv run python test_api.py ask --query <问题> [--material-ids <id,...>] [--user-id <id>] [--top-k <n>]
 
 全局选项:
     --base-url <url>   服务地址，默认 http://localhost:8000
+    --timeout <秒>     请求超时，默认 120
 """
 
 import argparse
@@ -78,6 +80,21 @@ def cmd_generate(args):
     pp(r.json())
 
 
+def cmd_ask(args):
+    payload = {"query": args.query}
+    if args.material_ids:
+        payload["material_ids"] = [s.strip() for s in args.material_ids.split(",")]
+    if args.user_id:
+        payload["user_id"] = args.user_id
+    if args.top_k:
+        payload["top_k"] = args.top_k
+
+    with httpx.Client(base_url=args.base_url, timeout=args.timeout) as c:
+        r = c.post("/ask", json=payload)
+    print(f"[{r.status_code}]")
+    pp(r.json())
+
+
 def main():
     parser = argparse.ArgumentParser(description="llm-service API 测试脚本")
     parser.add_argument("--base-url", default="http://localhost:8000", help="服务地址")
@@ -111,6 +128,13 @@ def main():
     p.add_argument("--user-id", default=None, help="用户 ID")
     p.add_argument("--top-k", type=int, default=None, help="返回片段数量")
 
+    # ask
+    p = sub.add_parser("ask", help="POST /ask — 知识问答")
+    p.add_argument("--query", required=True, help="用户问题")
+    p.add_argument("--material-ids", default=None, help="材料 ID 列表，逗号分隔")
+    p.add_argument("--user-id", default=None, help="用户 ID")
+    p.add_argument("--top-k", type=int, default=None, help="返回片段数量，默认 3")
+
     args = parser.parse_args()
 
     dispatch = {
@@ -119,6 +143,7 @@ def main():
         "process": cmd_process,
         "delete": cmd_delete,
         "generate": cmd_generate,
+        "ask": cmd_ask,
     }
     try:
         dispatch[args.command](args)
