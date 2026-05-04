@@ -6,6 +6,7 @@ from src.config import get_settings
 from src.infrastructure.llm_client import LLMClient
 from src.infrastructure.qdrant import QdrantStore
 from src.services.embedder import Embedder
+from src.services.ask_service import AskService
 from src.services.generator import GeneratorService
 from src.services.material_pipeline import MaterialPipeline
 from src.services.prompt_builder import PromptBuilder
@@ -21,6 +22,7 @@ class Container:
     retriever: Retriever
     prompt_builder: PromptBuilder
     generator: GeneratorService
+    ask_service: AskService
 
 
 _container: Container | None = None
@@ -50,6 +52,11 @@ def build_container() -> Container:
         prompt_builder=prompt_builder,
         llm_client=llm_client,
     )
+    ask_service = AskService(
+        retriever=retriever,
+        prompt_builder=prompt_builder,
+        llm_client=llm_client,
+    )
     return Container(
         embedder=embedder,
         qdrant_store=qdrant_store,
@@ -58,6 +65,7 @@ def build_container() -> Container:
         retriever=retriever,
         prompt_builder=prompt_builder,
         generator=generator,
+        ask_service=ask_service,
     )
 
 

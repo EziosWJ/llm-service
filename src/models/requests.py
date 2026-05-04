@@ -18,3 +18,10 @@ class GenerateRequest(BaseModel):
         if self.type == "polished" and not (self.content and self.content.strip()):
             raise ValueError("content is required when type=polished")
         return self
+
+
+class AskRequest(BaseModel):
+    query: str = Field(min_length=1)
+    material_ids: list[str] | None = None
+    user_id: str | None = None
+    top_k: int = Field(default=3, ge=1, le=20)

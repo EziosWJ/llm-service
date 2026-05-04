@@ -4,6 +4,7 @@ from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 
+from src.api.ask import router as ask_router
 from src.api.generate import router as generate_router
 from src.api.health import router as health_router
 from src.api.materials import router as materials_router
@@ -22,6 +23,7 @@ async def lifespan(app: FastAPI):
 app = FastAPI(title="llm-service", lifespan=lifespan)
 app.include_router(materials_router)
 app.include_router(generate_router)
+app.include_router(ask_router)
 app.include_router(health_router)
 
 
