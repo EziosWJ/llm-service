@@ -48,3 +48,35 @@ def test_build_title_fallback_for_empty_sources() -> None:
     assert "平台演进" in prompt
     assert "(无来源)" in prompt
     assert "讲述架构变化" in prompt
+
+
+def test_build_ask_with_list_sources() -> None:
+    builder = PromptBuilder()
+    prompt = builder.build_ask(
+        query="什么是 RAG？",
+        sources=["论文A", "论文B"],
+    )
+    assert "什么是 RAG？" in prompt
+    assert "- 论文A" in prompt
+    assert "- 论文B" in prompt
+    assert "不编造" in prompt
+
+
+def test_build_ask_with_string_sources() -> None:
+    builder = PromptBuilder()
+    prompt = builder.build_ask(
+        query="如何优化检索？",
+        sources="技术文档",
+    )
+    assert "如何优化检索？" in prompt
+    assert "技术文档" in prompt
+
+
+def test_build_ask_with_empty_sources() -> None:
+    builder = PromptBuilder()
+    prompt = builder.build_ask(
+        query="测试问题",
+        sources=[],
+    )
+    assert "测试问题" in prompt
+    assert "(无来源)" in prompt

@@ -32,9 +32,14 @@ class PromptBuilder:
     def build_title(self, topic: str, sources: str | Iterable[str], content: str) -> str:
         return self._render("title.j2", topic=topic, sources=sources, content=content)
 
-    def _render(self, template_name: str, topic: str, sources: str | Iterable[str], content: str) -> str:
+    def build_ask(self, query: str, sources: str | Iterable[str]) -> str:
+        return self._render("ask.j2", query=query, sources=sources)
+
+    def _render(self, template_name: str, **kwargs: str | Iterable[str]) -> str:
         template = self._env.get_template(template_name)
-        return template.render(topic=topic, sources=self._normalize_sources(sources), content=content).strip()
+        if "sources" in kwargs:
+            kwargs["sources"] = self._normalize_sources(kwargs["sources"])
+        return template.render(**kwargs).strip()
 
     @staticmethod
     def _normalize_sources(sources: str | Iterable[str]) -> str:
