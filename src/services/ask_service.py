@@ -30,14 +30,14 @@ class AskService:
             user_id=user_id,
             top_k=top_k,
         )
-        source_texts = [h["text"] for h in hits]
+        source_texts = [h.text for h in hits]
         prompt = self.prompt_builder.build_ask(query, source_texts)
         answer = self.llm_client.generate(prompt)
         source_objs = [
             Source(
-                text=h["text"],
-                material_id=h["metadata"].get("material_id"),
-                score=h["score"],
+                text=h.text,
+                material_id=h.material_id,
+                score=h.score,
             )
             for h in hits
         ]

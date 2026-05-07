@@ -15,6 +15,9 @@ def test_health_default_skips_llm(monkeypatch) -> None:
         collection_name = "materials_dummy"
         client = DummyQdrantClient()
 
+        def ensure_collection(self) -> None:
+            return None
+
     class DummyLLM:
         def generate(self, _: str) -> str:
             raise AssertionError("should not be called when deep=false")
@@ -24,6 +27,7 @@ def test_health_default_skips_llm(monkeypatch) -> None:
         llm_client = DummyLLM()
 
     monkeypatch.setattr("src.api.health.get_container", lambda: DummyContainer())
+    monkeypatch.setattr("src.main.get_container", lambda: DummyContainer())
     client = TestClient(app)
     response = client.get("/health")
     assert response.status_code == 200

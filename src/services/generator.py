@@ -25,7 +25,7 @@ class GeneratorService:
             user_id=request.user_id,
             top_k=request.top_k,
         )
-        sources = [h["text"] for h in hits]
+        sources = [h.text for h in hits]
         if request.type == "outline":
             prompt = self.prompt_builder.build_outline(request.topic, sources, request.content or "")
         elif request.type == "draft":
@@ -38,9 +38,9 @@ class GeneratorService:
         generated = self.llm_client.generate(prompt)
         source_objs = [
             Source(
-                text=h["text"],
-                material_id=h["metadata"].get("material_id"),
-                score=h["score"],
+                text=h.text,
+                material_id=h.material_id,
+                score=h.score,
             )
             for h in hits
         ]

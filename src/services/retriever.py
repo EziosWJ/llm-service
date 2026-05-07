@@ -1,8 +1,7 @@
 from __future__ import annotations
 
-from typing import Any
-
 from src.infrastructure.qdrant import QdrantStore
+from src.models.chunk import SourceChunk
 from src.services.embedder import Embedder
 
 
@@ -17,7 +16,7 @@ class Retriever:
         material_ids: list[str] | None = None,
         user_id: str | None = None,
         top_k: int = 5,
-    ) -> list[dict[str, Any]]:
+    ) -> list[SourceChunk]:
         vector = self.embedder.embed_texts([query])[0]
         points = self.qdrant_store.search(
             query_vector=vector,
@@ -25,14 +24,21 @@ class Retriever:
             material_ids=material_ids,
             user_id=user_id,
         )
-        results: list[dict[str, Any]] = []
+        results: list[SourceChunk] = []
         for point in points:
             payload = point.payload or {}
+            text = payload.get("text")
+            if not isinstance(text, str):
+                continue
+            if not text.strip():
+                continue
+
+            score = getattr(point, "score", None)
             results.append(
-                {
-                    "text": payload.get("text", ""),
-                    "score": float(point.score),
-                    "metadata": payload,
-                }
+                SourceChunk(
+                    text=text,
+                    material_id=payload.get("material_id"),
+                    score=float(score) if score is not None else None,
+                )
             )
         return results

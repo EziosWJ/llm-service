@@ -19,6 +19,7 @@ def _make_container(answer: str = "the answer", sources: list[Source] | None = N
 def test_ask_returns_200(monkeypatch) -> None:
     container = _make_container()
     monkeypatch.setattr("src.api.ask.get_container", lambda: container)
+    monkeypatch.setattr("src.main.get_container", lambda: container)
 
     client = TestClient(app)
     response = client.post("/ask", json={"query": "What is X?"})
@@ -35,6 +36,7 @@ def test_ask_returns_200(monkeypatch) -> None:
 def test_ask_passes_all_params(monkeypatch) -> None:
     container = _make_container()
     monkeypatch.setattr("src.api.ask.get_container", lambda: container)
+    monkeypatch.setattr("src.main.get_container", lambda: container)
 
     client = TestClient(app)
     response = client.post(
@@ -59,6 +61,7 @@ def test_ask_passes_all_params(monkeypatch) -> None:
 def test_ask_empty_query_returns_400(monkeypatch) -> None:
     container = _make_container()
     monkeypatch.setattr("src.api.ask.get_container", lambda: container)
+    monkeypatch.setattr("src.main.get_container", lambda: container)
 
     client = TestClient(app)
     response = client.post("/ask", json={"query": ""})

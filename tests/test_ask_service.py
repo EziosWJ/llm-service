@@ -4,6 +4,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
+from src.models.chunk import SourceChunk
 from src.models.responses import AskResponse, Source
 from src.services.ask_service import AskService
 
@@ -16,8 +17,8 @@ def mock_deps() -> tuple[MagicMock, MagicMock, MagicMock]:
     return retriever, prompt_builder, llm_client
 
 
-def _make_hit(text: str, material_id: str, score: float) -> dict:
-    return {"text": text, "metadata": {"material_id": material_id}, "score": score}
+def _make_hit(text: str, material_id: str | None, score: float | None) -> SourceChunk:
+    return SourceChunk(text=text, material_id=material_id, score=score)
 
 
 class TestAskService:
