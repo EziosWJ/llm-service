@@ -44,6 +44,8 @@ curl -s "http://127.0.0.1:8000/health" | jq
 
 ## APIs
 
+Java backend integration should follow [`docs/java-integration-guide.md`](docs/java-integration-guide.md).
+
 ### `POST /materials/process`
 
 Upload `docx`, `pdf`, or `txt` material and replace its chunks in Qdrant.
