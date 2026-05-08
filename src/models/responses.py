@@ -11,7 +11,17 @@ class ErrorResponse(BaseModel):
 class Source(BaseModel):
     text: str
     material_id: str | None = None
+    chunk_index: int | None = None
     score: float | None = None
+
+
+class MaterialProcessResponse(BaseModel):
+    deleted_count: int
+    chunk_count: int
+
+
+class DeleteVectorsResponse(BaseModel):
+    deleted_count: int
 
 
 class GenerateResponse(BaseModel):

@@ -9,8 +9,8 @@ class GenerateRequest(BaseModel):
     type: Literal["outline", "draft", "polished", "title"]
     topic: str = Field(min_length=1)
     content: str | None = None
-    material_ids: list[str] | None = None
-    user_id: str | None = None
+    material_ids: list[str] | None = Field(default=None, min_length=1)
+    user_id: str = Field(min_length=1)
     top_k: int = Field(default=5, ge=1, le=20)
 
     @model_validator(mode="after")
@@ -22,6 +22,6 @@ class GenerateRequest(BaseModel):
 
 class AskRequest(BaseModel):
     query: str = Field(min_length=1)
-    material_ids: list[str] | None = None
-    user_id: str | None = None
+    material_ids: list[str] | None = Field(default=None, min_length=1)
+    user_id: str = Field(min_length=1)
     top_k: int = Field(default=3, ge=1, le=20)

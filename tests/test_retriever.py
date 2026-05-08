@@ -12,13 +12,16 @@ def test_search_maps_qdrant_payload_to_source_chunks() -> None:
     qdrant_store = MagicMock()
     embedder.embed_texts.return_value = [[0.1, 0.2, 0.3]]
     qdrant_store.search.return_value = [
-        SimpleNamespace(payload={"text": "chunk one", "material_id": "mat-1", "ignored": "secret"}, score=0.9)
+        SimpleNamespace(
+            payload={"text": "chunk one", "material_id": "mat-1", "chunk_index": 7, "ignored": "secret"},
+            score=0.9,
+        )
     ]
 
     retriever = Retriever(embedder=embedder, qdrant_store=qdrant_store)
     results = retriever.search(query="What is X?", material_ids=["mat-1"], user_id="u1", top_k=3)
 
-    assert results == [SourceChunk(text="chunk one", material_id="mat-1", score=0.9)]
+    assert results == [SourceChunk(text="chunk one", material_id="mat-1", chunk_index=7, score=0.9)]
     embedder.embed_texts.assert_called_once_with(["What is X?"])
     qdrant_store.search.assert_called_once_with(
         query_vector=[0.1, 0.2, 0.3],

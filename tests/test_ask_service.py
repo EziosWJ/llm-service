@@ -17,8 +17,8 @@ def mock_deps() -> tuple[MagicMock, MagicMock, MagicMock]:
     return retriever, prompt_builder, llm_client
 
 
-def _make_hit(text: str, material_id: str | None, score: float | None) -> SourceChunk:
-    return SourceChunk(text=text, material_id=material_id, score=score)
+def _make_hit(text: str, material_id: str | None, score: float | None, chunk_index: int | None = None) -> SourceChunk:
+    return SourceChunk(text=text, material_id=material_id, chunk_index=chunk_index, score=score)
 
 
 class TestAskService:
@@ -26,7 +26,7 @@ class TestAskService:
         retriever, prompt_builder, llm_client = mock_deps
 
         hits = [
-            _make_hit("chunk one", "mat-1", 0.9),
+            _make_hit("chunk one", "mat-1", 0.9, chunk_index=1),
             _make_hit("chunk two", "mat-2", 0.8),
         ]
         retriever.search.return_value = hits
@@ -79,12 +79,12 @@ class TestAskService:
         llm_client.generate.return_value = "answer"
 
         service = AskService(retriever, prompt_builder, llm_client)
-        result = service.ask(query="hello")
+        result = service.ask(query="hello", user_id="u1")
 
         assert isinstance(result, AskResponse)
         retriever.search.assert_called_once_with(
             query="hello",
             material_ids=None,
-            user_id=None,
+            user_id="u1",
             top_k=3,
         )

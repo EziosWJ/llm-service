@@ -5,9 +5,9 @@
     uv run python test_api.py root
     uv run python test_api.py health [--deep]
     uv run python test_api.py process --file <path> --material-id <id> --user-id <id>
-    uv run python test_api.py delete --material-id <id> [--user-id <id>]
-    uv run python test_api.py generate --type <type> --topic <topic> [--content <text>] [--material-ids <id,...>] [--user-id <id>] [--top-k <n>]
-    uv run python test_api.py ask --query <问题> [--material-ids <id,...>] [--user-id <id>] [--top-k <n>]
+    uv run python test_api.py delete --material-id <id> --user-id <id>
+    uv run python test_api.py generate --type <type> --topic <topic> --user-id <id> [--content <text>] [--material-ids <id,...>] [--top-k <n>]
+    uv run python test_api.py ask --query <问题> --user-id <id> [--material-ids <id,...>] [--top-k <n>]
 
 全局选项:
     --base-url <url>   服务地址，默认 http://localhost:8000
@@ -51,9 +51,7 @@ def cmd_process(args):
 
 
 def cmd_delete(args):
-    params = {}
-    if args.user_id:
-        params["user_id"] = args.user_id
+    params = {"user_id": args.user_id}
     with httpx.Client(base_url=args.base_url, timeout=args.timeout) as c:
         r = c.delete(f"/materials/{args.material_id}/vectors", params=params)
     print(f"[{r.status_code}]")
@@ -69,8 +67,7 @@ def cmd_generate(args):
         payload["content"] = args.content
     if args.material_ids:
         payload["material_ids"] = [s.strip() for s in args.material_ids.split(",")]
-    if args.user_id:
-        payload["user_id"] = args.user_id
+    payload["user_id"] = args.user_id
     if args.top_k:
         payload["top_k"] = args.top_k
 
@@ -84,8 +81,7 @@ def cmd_ask(args):
     payload = {"query": args.query}
     if args.material_ids:
         payload["material_ids"] = [s.strip() for s in args.material_ids.split(",")]
-    if args.user_id:
-        payload["user_id"] = args.user_id
+    payload["user_id"] = args.user_id
     if args.top_k:
         payload["top_k"] = args.top_k
 
@@ -117,7 +113,7 @@ def main():
     # delete
     p = sub.add_parser("delete", help="DELETE /materials/{id}/vectors")
     p.add_argument("--material-id", required=True, help="材料 ID")
-    p.add_argument("--user-id", default=None, help="用户 ID（可选）")
+    p.add_argument("--user-id", required=True, help="用户 ID")
 
     # generate
     p = sub.add_parser("generate", help="POST /generate")
@@ -125,14 +121,14 @@ def main():
     p.add_argument("--topic", required=True, help="写作主题")
     p.add_argument("--content", default=None, help="补充内容（polished 时必填）")
     p.add_argument("--material-ids", default=None, help="材料 ID 列表，逗号分隔")
-    p.add_argument("--user-id", default=None, help="用户 ID")
+    p.add_argument("--user-id", required=True, help="用户 ID")
     p.add_argument("--top-k", type=int, default=None, help="返回片段数量")
 
     # ask
     p = sub.add_parser("ask", help="POST /ask — 知识问答")
     p.add_argument("--query", required=True, help="用户问题")
     p.add_argument("--material-ids", default=None, help="材料 ID 列表，逗号分隔")
-    p.add_argument("--user-id", default=None, help="用户 ID")
+    p.add_argument("--user-id", required=True, help="用户 ID")
     p.add_argument("--top-k", type=int, default=None, help="返回片段数量，默认 3")
 
     args = parser.parse_args()

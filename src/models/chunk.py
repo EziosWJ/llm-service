@@ -12,4 +12,5 @@ class Chunk:
 class SourceChunk:
     text: str
     material_id: str | None = None
+    chunk_index: int | None = None
     score: float | None = None

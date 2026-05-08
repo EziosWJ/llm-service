@@ -13,7 +13,7 @@ def test_generate_consumes_source_chunk_attributes() -> None:
     prompt_builder = MagicMock()
     llm_client = MagicMock()
     retriever.search.return_value = [
-        SourceChunk(text="chunk one", material_id="mat-1", score=0.9),
+        SourceChunk(text="chunk one", material_id="mat-1", chunk_index=3, score=0.9),
         SourceChunk(text="chunk two", material_id=None, score=None),
     ]
     prompt_builder.build_draft.return_value = "built prompt"
@@ -26,7 +26,7 @@ def test_generate_consumes_source_chunk_attributes() -> None:
     assert isinstance(result, GenerateResponse)
     assert result.generated_text == "generated"
     assert result.sources == [
-        Source(text="chunk one", material_id="mat-1", score=0.9),
+        Source(text="chunk one", material_id="mat-1", chunk_index=3, score=0.9),
         Source(text="chunk two", material_id=None, score=None),
     ]
     retriever.search.assert_called_once_with(

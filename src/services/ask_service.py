@@ -37,6 +37,7 @@ class AskService:
             Source(
                 text=h.text,
                 material_id=h.material_id,
+                chunk_index=h.chunk_index,
                 score=h.score,
             )
             for h in hits

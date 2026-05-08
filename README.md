@@ -46,7 +46,8 @@ curl -s "http://127.0.0.1:8000/health" | jq
 
 ### `POST /materials/process`
 
-Upload `docx`, `pdf`, or `txt` material and write chunks into Qdrant.
+Upload `docx`, `pdf`, or `txt` material and replace its chunks in Qdrant.
+If the same `material_id` and `user_id` already have vectors, old vectors are deleted before new chunks are written.
 
 Form fields:
 
@@ -63,9 +64,18 @@ curl -s -X POST "http://127.0.0.1:8000/materials/process" \
   -F "user_id=user-001" | jq
 ```
 
+Response:
+
+```json
+{
+  "deleted_count": 0,
+  "chunk_count": 8
+}
+```
+
 ### `DELETE /materials/{material_id}/vectors`
 
-Delete all vectors for one `material_id`.
+Delete all vectors for one `user_id + material_id`.
 
 Example:
 
@@ -83,8 +93,11 @@ Request fields:
 - `topic`
 - `content`: required when `type=polished`
 - `material_ids`: optional
-- `user_id`: optional
+- `user_id`: required
 - `top_k`: default `5`
+
+If `material_ids` is provided, it must be a non-empty list and retrieval is scoped by `user_id + material_ids`.
+If `material_ids` is omitted, retrieval is scoped by `user_id`.
 
 Example:
 
@@ -108,8 +121,11 @@ Request fields:
 
 - `query`: required, the question
 - `material_ids`: optional
-- `user_id`: optional
+- `user_id`: required
 - `top_k`: default `3`
+
+If `material_ids` is provided, it must be a non-empty list and retrieval is scoped by `user_id + material_ids`.
+If `material_ids` is omitted, retrieval is scoped by `user_id`.
 
 Example:
 
@@ -118,10 +134,13 @@ curl -s -X POST "http://127.0.0.1:8000/ask" \
   -H "Content-Type: application/json" \
   -d '{
     "query": "射击游戏有哪些",
+    "user_id": "user-001",
     "material_ids": ["mat-001"],
     "top_k": 3
   }' | jq
 ```
+
+Returned `sources` include `text`, `material_id`, `chunk_index`, and `score`.
 
 ## Test
 

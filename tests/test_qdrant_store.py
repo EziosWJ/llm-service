@@ -22,3 +22,21 @@ def test_search_uses_query_points(monkeypatch) -> None:
     assert captured["with_payload"] is True
     assert results[0].payload["text"] == "hit"
     assert results[0].score == 0.9
+
+
+def test_search_filters_by_user_id_and_material_ids(monkeypatch) -> None:
+    captured = {}
+
+    class FakeClient:
+        def query_points(self, **kwargs):
+            captured.update(kwargs)
+            return SimpleNamespace(points=[])
+
+    monkeypatch.setattr(qdrant, "QdrantClient", lambda url: FakeClient())
+
+    store = qdrant.QdrantStore(url="http://localhost:6333", collection_name="materials_test", vector_size=3)
+    store.search([0.1, 0.2, 0.3], material_ids=["mat-001", "mat-002"], user_id="user-001")
+
+    conditions = captured["query_filter"].must
+    assert len(conditions) == 2
+    assert {condition.key for condition in conditions} == {"material_id", "user_id"}

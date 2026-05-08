@@ -17,6 +17,7 @@ class MaterialPipeline:
         self.qdrant_store = qdrant_store
 
     def process_file(self, file_path: str | Path, material_id: str, user_id: str) -> dict[str, int]:
+        deleted_count = self.qdrant_store.delete_by_material_id(material_id, user_id=user_id)
         parsed = parse_document(file_path)
         sections = parsed.get("sections", [])
         section_title = sections[0]["heading"] if sections else None
@@ -41,4 +42,4 @@ class MaterialPipeline:
                 )
             )
         self.qdrant_store.upsert_points(points)
-        return {"chunk_count": len(points)}
+        return {"deleted_count": deleted_count, "chunk_count": len(points)}

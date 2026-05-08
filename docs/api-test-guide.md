@@ -70,6 +70,8 @@ uv run python test_api.py health --deep
 
 ### 3. POST /materials/process — 上传材料
 
+该接口采用覆盖语义：同一 `material_id` 和 `user_id` 重新处理时，会先删除旧向量，再写入新片段。
+
 ```bash
 uv run python test_api.py process --file <文件路径> --material-id <材料ID> --user-id <用户ID>
 ```
@@ -86,6 +88,7 @@ uv run python test_api.py process --file ./demo.txt --material-id mat_001 --user
 
 ```json
 {
+  "deleted_count": 0,
   "chunk_count": 8
 }
 ```
@@ -93,10 +96,10 @@ uv run python test_api.py process --file ./demo.txt --material-id mat_001 --user
 ### 4. DELETE /materials/{id}/vectors — 删除向量
 
 ```bash
-uv run python test_api.py delete --material-id <材料ID>
+uv run python test_api.py delete --material-id <材料ID> --user-id <用户ID>
 ```
 
-可选按用户过滤：
+必须按用户过滤：
 
 ```bash
 uv run python test_api.py delete --material-id mat_001 --user-id user_1
@@ -118,30 +121,30 @@ uv run python test_api.py delete --material-id mat_001 --user-id user_1
 |------|------|
 | `--type` | 生成类型：`outline`、`draft`、`polished`、`title` |
 | `--topic` | 写作主题 |
+| `--user-id` | 用户 ID |
 
 可选参数：
 
 | 参数 | 说明 |
 |------|------|
 | `--content` | 补充内容（`polished` 类型时必填） |
-| `--material-ids` | 材料 ID 列表，逗号分隔 |
-| `--user-id` | 用户 ID（按用户过滤片段） |
+| `--material-ids` | 材料 ID 列表，逗号分隔；指定时必须非空 |
 | `--top-k` | 返回片段数量，默认 5 |
 
 示例：
 
 ```bash
 # 生成提纲
-uv run python test_api.py generate --type outline --topic "人工智能发展"
+uv run python test_api.py generate --type outline --topic "人工智能发展" --user-id user_1
 
 # 生成初稿（指定材料）
-uv run python test_api.py generate --type draft --topic "人工智能发展" --material-ids mat_001,mat_002
+uv run python test_api.py generate --type draft --topic "人工智能发展" --user-id user_1 --material-ids mat_001,mat_002
 
 # 润色稿件（content 必填）
-uv run python test_api.py generate --type polished --topic "润色" --content "原文内容..."
+uv run python test_api.py generate --type polished --topic "润色" --user-id user_1 --content "原文内容..."
 
 # 生成标题（限制片段数）
-uv run python test_api.py generate --type title --topic "人工智能发展" --top-k 3
+uv run python test_api.py generate --type title --topic "人工智能发展" --user-id user_1 --top-k 3
 ```
 
 预期响应：
@@ -153,6 +156,7 @@ uv run python test_api.py generate --type title --topic "人工智能发展" --t
     {
       "text": "引用的片段内容",
       "material_id": "mat_001",
+      "chunk_index": 3,
       "score": 0.85
     }
   ]
@@ -166,29 +170,29 @@ uv run python test_api.py generate --type title --topic "人工智能发展" --t
 | 参数 | 说明 |
 |------|------|
 | `--query` | 用户问题 |
+| `--user-id` | 用户 ID |
 
 可选参数：
 
 | 参数 | 说明 |
 |------|------|
-| `--material-ids` | 材料 ID 列表，逗号分隔 |
-| `--user-id` | 用户 ID（按用户过滤片段） |
+| `--material-ids` | 材料 ID 列表，逗号分隔；指定时必须非空 |
 | `--top-k` | 返回片段数量，默认 3 |
 
 示例：
 
 ```bash
 # 基本问答
-uv run python test_api.py ask --query "射击游戏有哪些"
+uv run python test_api.py ask --query "射击游戏有哪些" --user-id user_1
 
 # 指定材料范围
-uv run python test_api.py ask --query "帝国时代是什么类型" --material-ids mat_001
+uv run python test_api.py ask --query "帝国时代是什么类型" --user-id user_1 --material-ids mat_001
 
 # 按用户过滤
 uv run python test_api.py ask --query "有哪些赛车游戏" --user-id user_1
 
 # 调整检索数量
-uv run python test_api.py ask --query "独立游戏有哪些" --top-k 5
+uv run python test_api.py ask --query "独立游戏有哪些" --user-id user_1 --top-k 5
 ```
 
 预期响应：
@@ -200,6 +204,7 @@ uv run python test_api.py ask --query "独立游戏有哪些" --top-k 5
     {
       "text": "引用的片段内容",
       "material_id": "mat_001",
+      "chunk_index": 3,
       "score": 0.85
     }
   ]

@@ -22,7 +22,7 @@ def test_ask_returns_200(monkeypatch) -> None:
     monkeypatch.setattr("src.main.get_container", lambda: container)
 
     client = TestClient(app)
-    response = client.post("/ask", json={"query": "What is X?"})
+    response = client.post("/ask", json={"query": "What is X?", "user_id": "u1"})
 
     assert response.status_code == 200
     body = response.json()
@@ -64,6 +64,28 @@ def test_ask_empty_query_returns_400(monkeypatch) -> None:
     monkeypatch.setattr("src.main.get_container", lambda: container)
 
     client = TestClient(app)
-    response = client.post("/ask", json={"query": ""})
+    response = client.post("/ask", json={"query": "", "user_id": "u1"})
+
+    assert response.status_code == 400
+
+
+def test_ask_missing_user_id_returns_400(monkeypatch) -> None:
+    container = _make_container()
+    monkeypatch.setattr("src.api.ask.get_container", lambda: container)
+    monkeypatch.setattr("src.main.get_container", lambda: container)
+
+    client = TestClient(app)
+    response = client.post("/ask", json={"query": "What is X?"})
+
+    assert response.status_code == 400
+
+
+def test_ask_empty_material_ids_returns_400(monkeypatch) -> None:
+    container = _make_container()
+    monkeypatch.setattr("src.api.ask.get_container", lambda: container)
+    monkeypatch.setattr("src.main.get_container", lambda: container)
+
+    client = TestClient(app)
+    response = client.post("/ask", json={"query": "What is X?", "user_id": "u1", "material_ids": []})
 
     assert response.status_code == 400

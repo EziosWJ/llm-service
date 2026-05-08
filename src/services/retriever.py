@@ -34,10 +34,12 @@ class Retriever:
                 continue
 
             score = getattr(point, "score", None)
+            chunk_index = payload.get("chunk_index")
             results.append(
                 SourceChunk(
                     text=text,
                     material_id=payload.get("material_id"),
+                    chunk_index=chunk_index if isinstance(chunk_index, int) else None,
                     score=float(score) if score is not None else None,
                 )
             )

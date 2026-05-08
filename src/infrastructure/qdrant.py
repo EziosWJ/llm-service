@@ -80,7 +80,7 @@ class QdrantStore:
                     match=qm.MatchAny(any=material_ids),
                 )
             )
-        elif user_id:
+        if user_id:
             conditions.append(qm.FieldCondition(key="user_id", match=qm.MatchValue(value=user_id)))
 
         if not conditions:
