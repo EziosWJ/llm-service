@@ -1,7 +1,10 @@
 from __future__ import annotations
 
 import importlib
+import logging
 from typing import Iterable
+
+logger = logging.getLogger(__name__)
 
 
 class Embedder:
@@ -20,6 +23,7 @@ class Embedder:
         if not text_list:
             return []
 
+        logger.debug("Embedding %d texts", len(text_list))
         model = self._get_model()
         embeddings = model.encode(text_list, convert_to_numpy=True, normalize_embeddings=True)
         return embeddings.tolist()

@@ -1,9 +1,13 @@
 from __future__ import annotations
 
+import logging
+
 from src.infrastructure.llm_client import LLMClient
 from src.models.responses import AskResponse, Source
 from src.services.prompt_builder import PromptBuilder
 from src.services.retriever import Retriever
+
+logger = logging.getLogger(__name__)
 
 
 class AskService:
@@ -24,6 +28,7 @@ class AskService:
         user_id: str | None = None,
         top_k: int = 3,
     ) -> AskResponse:
+        logger.info("Ask: query=%s, material_ids=%s, top_k=%d", query[:50], material_ids, top_k)
         hits = self.retriever.search(
             query=query,
             material_ids=material_ids,
@@ -42,4 +47,5 @@ class AskService:
             )
             for h in hits
         ]
+        logger.info("Ask completed: answer_length=%d, sources=%d", len(answer), len(source_objs))
         return AskResponse(answer=answer, sources=source_objs)

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 from pathlib import Path
 from uuid import uuid4
 
@@ -10,6 +11,8 @@ from src.services.chunker import chunk_text
 from src.services.document_parser import parse_document
 from src.services.embedder import Embedder
 
+logger = logging.getLogger(__name__)
+
 
 class MaterialPipeline:
     def __init__(self, embedder: Embedder, qdrant_store: QdrantStore) -> None:
@@ -17,6 +20,7 @@ class MaterialPipeline:
         self.qdrant_store = qdrant_store
 
     def process_file(self, file_path: str | Path, material_id: str, user_id: str) -> dict[str, int]:
+        logger.info("Processing file: material_id=%s, user_id=%s, path=%s", material_id, user_id, file_path)
         deleted_count = self.qdrant_store.delete_by_material_id(material_id, user_id=user_id)
         parsed = parse_document(file_path)
         sections = parsed.get("sections", [])
@@ -42,4 +46,5 @@ class MaterialPipeline:
                 )
             )
         self.qdrant_store.upsert_points(points)
+        logger.info("File processed: material_id=%s, deleted=%d, chunks=%d", material_id, deleted_count, len(points))
         return {"deleted_count": deleted_count, "chunk_count": len(points)}

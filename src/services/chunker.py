@@ -1,7 +1,10 @@
+import logging
 import re
 from typing import Any
 
 from src.models.chunk import Chunk
+
+logger = logging.getLogger(__name__)
 
 
 def _tokenize(text: str) -> list[str]:
@@ -55,6 +58,8 @@ def chunk_text(
     chunks: list[Chunk] = []
     paragraphs = _split_paragraphs(text)
 
+    logger.debug("Chunking: text_length=%d, paragraphs=%d, chunk_size=%d, overlap=%d", len(text), len(paragraphs), chunk_size, overlap)
+
     for p_idx, para in enumerate(paragraphs):
         tokens = _tokenize(para)
         if not tokens:
@@ -73,4 +78,6 @@ def chunk_text(
                 {"paragraph_index": p_idx, "subchunk_index": s_idx, "token_count": len(sub_tokens)}
             )
             chunks.append(Chunk(text=_detokenize(sub_tokens), metadata=meta))
+
+    logger.debug("Chunking result: %d chunks", len(chunks))
     return chunks

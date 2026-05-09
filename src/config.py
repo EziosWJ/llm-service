@@ -11,6 +11,7 @@ class Settings(BaseSettings):
     embedding_model: str
     qdrant_url: str = "http://localhost:6333"
     qdrant_collection_prefix: str = "materials"
+    log_level: str = "INFO"
 
     model_config = SettingsConfigDict(
         env_file=".env",

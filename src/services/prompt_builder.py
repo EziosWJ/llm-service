@@ -1,9 +1,12 @@
 from __future__ import annotations
 
+import logging
 from pathlib import Path
 from typing import Iterable
 
 from jinja2 import Environment, FileSystemLoader, StrictUndefined
+
+logger = logging.getLogger(__name__)
 
 
 class PromptBuilder:
@@ -39,6 +42,7 @@ class PromptBuilder:
         template = self._env.get_template(template_name)
         if "sources" in kwargs:
             kwargs["sources"] = self._normalize_sources(kwargs["sources"])
+        logger.debug("Rendering template: %s", template_name)
         return template.render(**kwargs).strip()
 
     @staticmethod

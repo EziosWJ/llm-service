@@ -1,10 +1,14 @@
 from __future__ import annotations
 
+import logging
+
 from src.infrastructure.llm_client import LLMClient
 from src.models.requests import GenerateRequest
 from src.models.responses import GenerateResponse, Source
 from src.services.prompt_builder import PromptBuilder
 from src.services.retriever import Retriever
+
+logger = logging.getLogger(__name__)
 
 
 class GeneratorService:
@@ -26,6 +30,7 @@ class GeneratorService:
             top_k=request.top_k,
         )
         sources = [h.text for h in hits]
+        logger.info("Generate: topic=%s, type=%s, source_count=%d", request.topic[:50], request.type, len(sources))
         if request.type == "outline":
             prompt = self.prompt_builder.build_outline(request.topic, sources, request.content or "")
         elif request.type == "draft":
@@ -45,4 +50,5 @@ class GeneratorService:
             )
             for h in hits
         ]
+        logger.info("Generate completed: text_length=%d", len(generated))
         return GenerateResponse(generated_text=generated, sources=source_objs)

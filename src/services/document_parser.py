@@ -1,8 +1,11 @@
 from __future__ import annotations
 
+import logging
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass(frozen=True)
@@ -15,12 +18,14 @@ class ParsedSection:
 def parse_document(file_path: str | Path) -> dict[str, Any]:
     path = Path(file_path)
     ext = path.suffix.lower()
+    logger.info("Parsing document: path=%s, ext=%s", path, ext)
     if ext in (".txt", ".md"):
         return _parse_txt(path)
     if ext == ".docx":
         return _parse_docx(path)
     if ext == ".pdf":
         return _parse_pdf(path)
+    logger.warning("Unsupported document extension: %s", ext or "<none>")
     raise ValueError(f"Unsupported file type: {ext or '<none>'}")
 
 

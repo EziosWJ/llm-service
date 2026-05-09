@@ -1,8 +1,12 @@
 from __future__ import annotations
 
+import logging
+
 from src.infrastructure.qdrant import QdrantStore
 from src.models.chunk import SourceChunk
 from src.services.embedder import Embedder
+
+logger = logging.getLogger(__name__)
 
 
 class Retriever:
@@ -17,6 +21,7 @@ class Retriever:
         user_id: str | None = None,
         top_k: int = 5,
     ) -> list[SourceChunk]:
+        logger.debug("Vector search: query=%s, material_ids=%s, user_id=%s, top_k=%d", query[:50], material_ids, user_id, top_k)
         vector = self.embedder.embed_texts([query])[0]
         points = self.qdrant_store.search(
             query_vector=vector,
@@ -43,4 +48,5 @@ class Retriever:
                     score=float(score) if score is not None else None,
                 )
             )
+        logger.debug("Search returned %d results", len(results))
         return results
