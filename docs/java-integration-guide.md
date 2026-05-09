@@ -23,6 +23,7 @@ Python 服务不提供材料列表、材料详情、业务权限校验、异步�
 ## 通用规则
 
 - `material_id` 只在 `user_id` 下唯一，不承诺全局唯一。
+- Java 后端业务库中的材料主键仍优先使用 `BIGINT` 自增 ID；调用 Python 时可传该 ID 作为 `material_id`。Python 服务必须按 `user_id + material_id` 隔离向量数据，不得只依赖 `material_id`。
 - 所有材料向量维护、写作任务和问答请求都必须携带 `user_id`。
 - Java 调用 Python 前必须完成业务权限校验，Python 只用 `user_id` 做向量隔离。
 - `material_ids` 不传或为 `null` 时，按当前 `user_id` 的全部材料检索。
@@ -87,6 +88,7 @@ Content-Type: multipart/form-data
 - `.txt`
 - `.docx`
 - `.pdf`
+- `.md`
 
 请求示例：
 

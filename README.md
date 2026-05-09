@@ -48,7 +48,7 @@ Java backend integration should follow [`docs/java-integration-guide.md`](docs/j
 
 ### `POST /materials/process`
 
-Upload `docx`, `pdf`, or `txt` material and replace its chunks in Qdrant.
+Upload `docx`, `pdf`, `md` or `txt` material and replace its chunks in Qdrant.
 If the same `material_id` and `user_id` already have vectors, old vectors are deleted before new chunks are written.
 
 Form fields:

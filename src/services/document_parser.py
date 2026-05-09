@@ -15,7 +15,7 @@ class ParsedSection:
 def parse_document(file_path: str | Path) -> dict[str, Any]:
     path = Path(file_path)
     ext = path.suffix.lower()
-    if ext == ".txt":
+    if ext in (".txt", ".md"):
         return _parse_txt(path)
     if ext == ".docx":
         return _parse_docx(path)

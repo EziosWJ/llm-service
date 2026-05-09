@@ -4,7 +4,43 @@
 
 ## 前置条件
 
-服务已启动：
+### 1. Qdrant 向量数据库
+
+项目使用 Qdrant 作为向量数据库，需先部署。
+
+**Docker 一行启动：**
+
+```bash
+docker run -d --name qdrant -p 6333:6333 -p 6334:6334 -v qdrant_data:/qdrant/storage qdrant/qdrant
+```
+
+**或使用 docker-compose.yml：**
+
+```yaml
+services:
+  qdrant:
+    image: qdrant/qdrant
+    ports:
+      - "6333:6333"   # REST API
+      - "6334:6334"   # gRPC
+    volumes:
+      - qdrant_data:/qdrant/storage
+    restart: unless-stopped
+
+volumes:
+  qdrant_data:
+```
+
+**配置 .env：**
+
+```bash
+QDRANT_URL=http://<qdrant地址>:6333
+QDRANT_COLLECTION_PREFIX=materials
+```
+
+部署完成后，访问 `http://<qdrant地址>:6333/dashboard` 可打开 Qdrant 自带的 Web 管理界面。
+
+### 2. 启动服务
 
 ```bash
 uv run uvicorn src.main:app --reload

@@ -10,7 +10,7 @@ from src.models.errors import ValidationError
 from src.models.responses import DeleteVectorsResponse, MaterialProcessResponse
 
 router = APIRouter(prefix="/materials", tags=["materials"])
-SUPPORTED_MATERIAL_SUFFIXES = {".txt", ".docx", ".pdf"}
+SUPPORTED_MATERIAL_SUFFIXES = {".txt", ".docx", ".pdf", ".md"}
 
 
 @router.post("/process", response_model=MaterialProcessResponse)
