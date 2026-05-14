@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+from typing import Iterator
 
 from openai import APIConnectionError, APITimeoutError, OpenAI
 
@@ -45,3 +46,25 @@ class LLMClient:
             return choice.message.content
         logger.warning("LLM returned empty response")
         return ""
+
+    def generate_stream(self, prompt: str) -> Iterator[str]:
+        logger.info("LLM stream request: prompt_length=%d, model=%s", len(prompt), self.model)
+        try:
+            stream = self.client.chat.completions.create(
+                model=self.model,
+                messages=[{"role": "user", "content": prompt}],
+                extra_body={"enable_thinking": self.enable_thinking},
+                stream=True,
+            )
+        except (APITimeoutError, APIConnectionError) as exc:
+            logger.error("LLM upstream failure: %s", exc)
+            raise UpstreamError("LLM upstream timeout or connection failure") from exc
+
+        try:
+            for chunk in stream:
+                delta = chunk.choices[0].delta if chunk.choices else None
+                if delta and delta.content:
+                    yield delta.content
+        except (APITimeoutError, APIConnectionError) as exc:
+            logger.error("LLM stream interrupted: %s", exc)
+            raise UpstreamError("LLM stream interrupted") from exc

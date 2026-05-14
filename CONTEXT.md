@@ -32,6 +32,10 @@ _Avoid_: 提示词模板、prompt
 Java 后端为保持材料与片段一致而调用 Python 服务写入、替换或删除向量的对接能力。
 _Avoid_: 知识库 CRUD、材料 CRUD（指 Python 服务职责时）
 
+**流式传输**:
+写作任务或问答的流式返回模式。Python 服务通过 SSE（Server-Sent Events）逐块推送生成文本，Java 端实时转发给前端实现逐字展示。事件顺序为：sources → delta* → done（或 error）。
+_Avoid_: SSE、streaming（在业务讨论中）
+
 ## Relationships
 
 - 一个**材料**被解析后产生多个**片段**
@@ -51,6 +55,8 @@ _Avoid_: 知识库 CRUD、材料 CRUD（指 Python 服务职责时）
 - **材料**在向量库中全局共享，通过 metadata 字段标记所属用户，检索范围由 Java 后端通过请求参数控制
 - **片段**按自然段落切分，超长段落按固定长度二次切分；每个片段携带材料 ID、片段序号、章节标题等元数据
 - Java 调用 Python 服务为同步阻塞模式，Python 调用本地大模型后直接返回结果
+- **流式传输**与同步生成共存：同步端点（`POST /generate`、`POST /ask`）返回完整结果，流式端点（`POST /generate/stream`、`POST /ask/stream`）通过 SSE 逐块返回；两者共享检索和 prompt 构建逻辑
+- 流式传输的 SSE 事件顺序：先发 sources 事件（来源片段），再发 delta 事件（生成文本片段），最后发 done 事件；中途出错时发 error 事件替代 done
 - 四种生成类型（提纲、初稿、润色稿、标题）共用一个统一端点，通过 `type` 字段区分，内部选择不同 Prompt 模板
 - 文档处理（解析 → 切分 → embedding → 写入向量库）为单一端点，Python 内部串联完成
 - Java 通过 multipart 文件上传将原始材料文件传给 Python，Python 负责解析
