@@ -1,3 +1,5 @@
+# 依赖注入容器：组装并缓存所有服务和基础设施实例
+
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -15,6 +17,7 @@ from src.services.retriever import Retriever
 
 @dataclass
 class Container:
+    """DI 容器，持有所有服务实例，避免全局散落的依赖关系"""
     embedder: Embedder
     qdrant_store: QdrantStore
     llm_client: LLMClient
@@ -29,8 +32,10 @@ _container: Container | None = None
 
 
 def build_container() -> Container:
+    """构建完整的依赖图：从配置出发，依次创建基础设施 → 服务 → 业务层"""
     settings = get_settings()
     embedder = Embedder(settings.embedding_model)
+    # 将模型名转为安全的集合名后缀（去除路径前缀和冒号）
     safe_model_name = settings.embedding_model.split("/")[-1].replace(":", "_")
     collection_name = f"{settings.qdrant_collection_prefix}_{safe_model_name}"
     qdrant_store = QdrantStore(
@@ -70,6 +75,7 @@ def build_container() -> Container:
 
 
 def get_container() -> Container:
+    """懒加载单例：首次调用时构建容器，后续直接返回缓存实例"""
     global _container
     if _container is None:
         _container = build_container()

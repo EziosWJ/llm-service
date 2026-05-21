@@ -6,7 +6,8 @@
       "Bash(python3.12 --version)",
       "Bash(uv python *)",
       "Read(//home/wangjian/.claude/skills/grill-with-docs/**)",
-      "Read(//home/wangjian/.agents/skills/grill-with-docs/**)"
+      "Read(//home/wangjian/.agents/skills/grill-with-docs/**)",
+      "Bash(uv run *)"
     ]
   }
 }

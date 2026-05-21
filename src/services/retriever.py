@@ -1,3 +1,5 @@
+"""向量检索服务：将查询文本向量化后，在 Qdrant 中按相似度搜索匹配的素材片段。"""
+
 from __future__ import annotations
 
 import logging
@@ -21,6 +23,7 @@ class Retriever:
         user_id: str | None = None,
         top_k: int = 5,
     ) -> list[SourceChunk]:
+        """执行向量检索，支持按 material_ids 和 user_id 过滤，返回 top_k 个最相关的片段。"""
         logger.debug("Vector search: query=%s, material_ids=%s, user_id=%s, top_k=%d", query[:50], material_ids, user_id, top_k)
         vector = self.embedder.embed_texts([query])[0]
         points = self.qdrant_store.search(

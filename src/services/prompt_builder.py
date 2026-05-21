@@ -1,3 +1,5 @@
+"""Prompt 构建器：使用 Jinja2 模板将主题、素材和内容组装为 LLM prompt。"""
+
 from __future__ import annotations
 
 import logging
@@ -13,6 +15,7 @@ class PromptBuilder:
     """Build prompts from Jinja templates."""
 
     def __init__(self, template_dir: str | Path | None = None) -> None:
+        """初始化 Jinja2 环境，默认从 src/templates 目录加载模板。"""
         if template_dir is None:
             template_dir = Path(__file__).resolve().parents[1] / "templates"
         self._env = Environment(
@@ -47,6 +50,7 @@ class PromptBuilder:
 
     @staticmethod
     def _normalize_sources(sources: str | Iterable[str]) -> str:
+        """将素材来源列表格式化为带 '- ' 前缀的多行文本，空列表返回 '(无来源)'。"""
         if isinstance(sources, str):
             return sources
         lines = [str(item).strip() for item in sources if str(item).strip()]

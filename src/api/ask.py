@@ -1,3 +1,5 @@
+# 问答接口：基于素材进行知识问答，支持同步和 SSE 流式响应
+
 from __future__ import annotations
 
 import json
@@ -16,12 +18,14 @@ router = APIRouter(tags=["ask"])
 
 
 def _sse_stream(iterator):
+    """将事件迭代器转为 SSE 格式的文本流（event + data）"""
     for event in iterator:
         yield f"event: {event['event']}\ndata: {json.dumps(event['data'], ensure_ascii=False)}\n\n"
 
 
 @router.post("/ask", response_model=AskResponse)
 def ask(request: AskRequest) -> AskResponse:
+    """同步问答：检索相关素材后生成回答，一次性返回完整结果"""
     logger.info("Ask request: query=%s, material_ids=%s", request.query[:50], request.material_ids)
     container = get_container()
     response = container.ask_service.ask(
@@ -36,6 +40,7 @@ def ask(request: AskRequest) -> AskResponse:
 
 @router.post("/ask/stream")
 def ask_stream(request: AskRequest) -> StreamingResponse:
+    """流式问答：以 SSE 逐步推送回答内容，适用于长文本场景"""
     logger.info("Ask stream request: query=%s, material_ids=%s", request.query[:50], request.material_ids)
     container = get_container()
     iterator = container.ask_service.ask_stream(

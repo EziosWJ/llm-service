@@ -1,9 +1,12 @@
+# 应用配置：从 .env 文件和环境变量读取配置项，全局单例缓存
+
 from functools import lru_cache
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
+    """应用配置，字段自动从环境变量或 .env 文件绑定"""
     llm_base_url: str
     llm_model: str
     llm_api_key: str | None = None
@@ -22,4 +25,5 @@ class Settings(BaseSettings):
 
 @lru_cache(maxsize=1)
 def get_settings() -> Settings:
+    """全局单例：确保整个进程只解析一次配置"""
     return Settings()

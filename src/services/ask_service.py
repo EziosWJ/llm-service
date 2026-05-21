@@ -1,3 +1,5 @@
+"""知识问答服务：基于检索到的素材片段，调用 LLM 回答用户提问。"""
+
 from __future__ import annotations
 
 import logging
@@ -13,6 +15,7 @@ logger = logging.getLogger(__name__)
 
 
 class AskService:
+    """问答服务，支持同步返回和 SSE 流式返回两种模式。"""
     def __init__(
         self,
         retriever: Retriever,
@@ -30,6 +33,7 @@ class AskService:
         user_id: str | None = None,
         top_k: int = 3,
     ) -> AskResponse:
+        """同步问答：检索相关素材 -> 构建 prompt -> LLM 生成回答。"""
         logger.info("Ask: query=%s, material_ids=%s, top_k=%d", query[:50], material_ids, top_k)
         hits = self.retriever.search(
             query=query,
@@ -59,6 +63,7 @@ class AskService:
         user_id: str | None = None,
         top_k: int = 3,
     ) -> Iterator[dict]:
+        """流式问答：依次 yield sources / delta / done / error 事件，供 SSE 消费。"""
         logger.info("Ask stream: query=%s, material_ids=%s, top_k=%d", query[:50], material_ids, top_k)
         hits = self.retriever.search(
             query=query,

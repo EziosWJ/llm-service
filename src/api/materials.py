@@ -1,3 +1,5 @@
+# 素材管理接口：上传文件进行向量化处理，以及按素材 ID 删除向量
+
 from __future__ import annotations
 
 import logging
@@ -22,12 +24,14 @@ async def process_material(
     material_id: str = Form(...),
     user_id: str = Form(...),
 ) -> MaterialProcessResponse:
+    """上传素材文件，解析内容并写入向量数据库"""
     suffix = Path(file.filename or "").suffix
     if suffix.lower() not in SUPPORTED_MATERIAL_SUFFIXES:
         logger.warning("Unsupported file type: suffix=%s, material_id=%s", suffix, material_id)
         raise ValidationError("unsupported material file type")
 
     logger.info("Processing material: material_id=%s, user_id=%s, filename=%s", material_id, user_id, file.filename)
+    # 将上传文件写入临时文件，供后续处理管线读取
     with NamedTemporaryFile(delete=False, suffix=suffix) as tmp:
         tmp.write(await file.read())
         tmp_path = Path(tmp.name)
@@ -49,6 +53,7 @@ def delete_vectors(
     material_id: str,
     user_id: str = Query(..., min_length=1),
 ) -> DeleteVectorsResponse:
+    """删除指定素材的所有向量，需提供 user_id 做归属校验"""
     logger.info("Deleting vectors: material_id=%s, user_id=%s", material_id, user_id)
     container = get_container()
     deleted_count = container.qdrant_store.delete_by_material_id(material_id, user_id=user_id)

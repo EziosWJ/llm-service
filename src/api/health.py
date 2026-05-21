@@ -1,3 +1,5 @@
+# 健康检查接口：探测 Qdrant 和 LLM 服务的可用性
+
 from __future__ import annotations
 
 from fastapi import APIRouter, Query
@@ -10,6 +12,7 @@ router = APIRouter(tags=["health"])
 
 @router.get("/health")
 def health(deep: bool = Query(default=False)) -> JSONResponse:
+    """健康检查：默认仅探测 Qdrant；deep=true 时额外探测 LLM 服务"""
     container = get_container()
     checks: dict[str, dict[str, str]] = {}
     ok_count = 0

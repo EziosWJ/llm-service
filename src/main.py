@@ -1,3 +1,5 @@
+# FastAPI 应用入口：注册路由、异常处理器，管理应用生命周期
+
 import logging
 from contextlib import asynccontextmanager
 
@@ -20,6 +22,7 @@ logger = logging.getLogger(__name__)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    """应用生命周期：启动时初始化日志和向量数据库集合，关闭时自动清理"""
     settings = get_settings()
     setup_logging(settings.log_level)
     logger.info("Logging initialized, level=%s", settings.log_level)
@@ -36,9 +39,12 @@ app.include_router(health_router)
 
 
 def _err(status_code: int, error: str, detail: str) -> JSONResponse:
+    """构造统一格式的错误 JSON 响应"""
     payload = ErrorResponse(error=error, detail=detail).model_dump()
     return JSONResponse(status_code=status_code, content=payload)
 
+
+# --- 全局异常处理器：将自定义异常统一映射为标准 JSON 错误响应 ---
 
 @app.exception_handler(ValidationError)
 async def handle_validation_error(_: Request, exc: ValidationError) -> JSONResponse:

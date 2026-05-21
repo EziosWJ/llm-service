@@ -1,3 +1,5 @@
+"""内容生成服务：根据请求类型（outline/draft/polished/title）检索素材并调用 LLM 生成内容。"""
+
 from __future__ import annotations
 
 import logging
@@ -25,6 +27,7 @@ class GeneratorService:
         self.llm_client = llm_client
 
     def generate(self, request: GenerateRequest) -> GenerateResponse:
+        """同步生成：检索素材 -> 根据 type 选择对应 prompt 模板 -> LLM 生成 -> 返回结果。"""
         hits = self.retriever.search(
             query=request.topic,
             material_ids=request.material_ids,
@@ -56,6 +59,7 @@ class GeneratorService:
         return GenerateResponse(generated_text=generated, sources=source_objs)
 
     def generate_stream(self, request: GenerateRequest) -> Iterator[dict]:
+        """流式生成：依次 yield sources -> delta（逐 token）-> done 事件，供 SSE 消费。"""
         hits = self.retriever.search(
             query=request.topic,
             material_ids=request.material_ids,

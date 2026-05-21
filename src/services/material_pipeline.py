@@ -1,3 +1,5 @@
+"""素材处理管线：文件上传后的完整处理流程——解析文档、分块、向量化、存入 Qdrant。"""
+
 from __future__ import annotations
 
 import logging
@@ -20,6 +22,7 @@ class MaterialPipeline:
         self.qdrant_store = qdrant_store
 
     def process_file(self, file_path: str | Path, material_id: str, user_id: str) -> dict[str, int]:
+        """处理单个素材文件：删除旧数据 -> 解析 -> 分块 -> 向量化 -> 写入向量库。"""
         logger.info("Processing file: material_id=%s, user_id=%s, path=%s", material_id, user_id, file_path)
         deleted_count = self.qdrant_store.delete_by_material_id(material_id, user_id=user_id)
         parsed = parse_document(file_path)
